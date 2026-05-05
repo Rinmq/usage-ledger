@@ -59,6 +59,13 @@ usage-ledger/
             UsageLedgerApplication.java
             controller/
               HealthController.java
+              IntegrityCheckController.java
+            service/
+              IntegrityCheckService.java
+            repository/
+              IntegrityCheckRepository.java
+            dto/
+              OutOfContractUsageResponse.java
         resources/
           application.properties
           db/
@@ -200,6 +207,32 @@ Get-Content db/05_integrity_checks.sql | docker compose exec -T db psql -U app_u
 
 不整合データは自動修正せず、運用上の確認対象として検知する方針です。
 
+## 契約期間外利用の不整合検知API
+
+契約期間外に記録された利用量を、Spring Boot API から確認できます。
+
+```powershell
+curl.exe "http://localhost:8081/integrity-checks/out-of-contract-usages?month=2026-04"
+```
+
+期待結果:
+
+```json
+[
+  {
+    "dailyUsageId": 8,
+    "customerId": 3,
+    "customerName": "Gamma Studio",
+    "serviceId": 3,
+    "serviceName": "Analytics API",
+    "usageDate": "2026-04-05",
+    "usageAmount": 2000
+  }
+]
+```
+
+このAPIでは、`daily_usages` に記録された利用量について、利用日に有効な契約が存在しないデータを抽出します。
+
 ## Flyway によるDB変更管理
 
 このプロジェクトでは、Spring Boot アプリケーション側でDB変更履歴を管理するために Flyway を導入しています。
@@ -249,6 +282,7 @@ docker compose exec db psql -U app_user -d usage_ledger -c "SELECT installed_ran
 - 契約期間外利用の不整合検知SQL
 - Spring Boot の初期構成
 - ヘルスチェックAPI
+- 契約期間外利用の不整合検知API
 - Spring Boot から PostgreSQL への接続
 - Flyway migration によるDBスキーマ作成
 - Flyway migration によるseedデータ投入
@@ -259,7 +293,6 @@ docker compose exec db psql -U app_user -d usage_ledger -c "SELECT installed_ran
 今後、以下を追加する予定です。
 
 - 月次請求プレビューAPI
-- 契約期間外利用の不整合検知API
 - 請求作成処理
 - JUnit によるテスト
 - README / docs のアーキテクチャ説明強化
