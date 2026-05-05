@@ -77,4 +77,3 @@ INSERT INTO daily_usages (customer_id, service_id, usage_date, usage_amount) VAL
         DATE '2026-04-05',
         2000
     );
-    

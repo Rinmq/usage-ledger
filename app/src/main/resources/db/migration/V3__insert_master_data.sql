@@ -37,4 +37,3 @@ INSERT INTO customers (name, email, status) VALUES
     ('Alpha Corporation', 'billing-alpha@example.com', 'active'),
     ('Beta Works', 'billing-beta@example.com', 'active'),
     ('Gamma Studio', 'billing-gamma@example.com', 'inactive');
-    
