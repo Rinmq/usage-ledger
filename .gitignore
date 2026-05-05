@@ -19,3 +19,6 @@ out/
 
 # Docker / local
 postgres_data/
+
+# Maven / Spring Boot
+target/
