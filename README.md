@@ -155,13 +155,51 @@ curl.exe http://localhost:8081/health
 - 契約期間外利用の不整合検知SQL
 - Spring Boot の初期構成
 - ヘルスチェックAPI
+- Spring Boot から PostgreSQL への接続確認
+- Flyway によるDB変更管理の初期設定
+- 既存DBをFlyway管理の開始地点として扱うbaseline設定
+
+## Flyway によるDB変更管理
+
+このプロジェクトでは、Spring Boot アプリケーション側でDB変更履歴を管理するために Flyway を導入しています。
+
+Flyway は、`app/src/main/resources/db/migration/` 配下の migration ファイルを読み取り、未適用のDB変更だけを順番に適用します。適用履歴は PostgreSQL 上の `flyway_schema_history` テーブルに記録されます。
+
+現時点では、既存の `db/` 配下SQLによって作成済みのDBを Flyway 管理の開始地点として扱うため、以下の設定を使用しています。
+
+```properties
+spring.flyway.baseline-on-migrate=true
+```
+
+これは、すでにテーブルが存在するDBに後から Flyway を導入するための設定です。
+
+今後、既存の schema / seed SQL を Flyway migration に移行し、DB構造とアプリケーションコードの変更履歴を対応させて管理する予定です。
+
+### Flyway履歴テーブルの確認
+
+```bash
+docker compose exec db psql -U app_user -d usage_ledger -c "\dt flyway_schema_history"
+```
+
+### Flyway適用履歴の確認
+
+```bash
+docker compose exec db psql -U app_user -d usage_ledger -c "SELECT installed_rank, version, description, type, success FROM flyway_schema_history;"
+```
+
+期待結果の例:
+
+```text
+ installed_rank | version |      description      |   type   | success
+----------------+---------+-----------------------+----------+---------
+              1 | 1       | << Flyway Baseline >> | BASELINE | t
+```
 
 ## 今後追加予定
 
 今後、以下を追加する予定です。
 
-- Flyway によるマイグレーション管理
-- Spring Boot から PostgreSQL への接続
+- 既存の schema / seed SQL の Flyway migration 移行
 - 月次請求プレビューAPI
 - 契約期間外利用の不整合検知API
 - 請求作成処理
